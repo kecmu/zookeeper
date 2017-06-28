@@ -74,7 +74,6 @@ module org.apache.zookeeper.proto {
         vector<ustring>childWatches;
     }        
     class RequestHeader {
-        int sid;
         int xid;
         int type;
     }

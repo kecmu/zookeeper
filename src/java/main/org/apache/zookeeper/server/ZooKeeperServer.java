@@ -1049,7 +1049,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
         RequestHeader h = new RequestHeader();
         h.deserialize(bia, "header");
-        LOG.info("SID: " + 0);
+        LOG.info("SID: " + h.getSid());
         // Through the magic of byte buffers, txn will not be
         // pointing
         // to the start of the txn

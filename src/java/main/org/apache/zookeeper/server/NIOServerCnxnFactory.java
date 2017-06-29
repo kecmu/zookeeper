@@ -521,6 +521,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
         }
 
         public void doWork() throws InterruptedException {
+            LOG.info("here4");
             if (!key.isValid()) {
                 selectorThread.cleanupSelectionKey(key);
                 return;

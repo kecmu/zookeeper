@@ -314,6 +314,7 @@ public class NettyServerCnxn extends ServerCnxn {
 
     public void receiveMessage(ChannelBuffer message) {
         try {
+            LOG.info("reaches here!");
             while(message.readable() && !throttled) {
                 if (bb != null) {
                     if (LOG.isTraceEnabled()) {

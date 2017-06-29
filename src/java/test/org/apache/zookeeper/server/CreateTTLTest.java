@@ -76,7 +76,7 @@ public class CreateTTLTest extends ClientBase {
 
     @Test
     public void testBadTTLs() throws InterruptedException, KeeperException {
-        RequestHeader h = new RequestHeader(1, ZooDefs.OpCode.createTTL);
+        RequestHeader h = new RequestHeader(0, 1, ZooDefs.OpCode.createTTL);
 
         String path = "/bad_ttl";
         CreateTTLRequest request = new CreateTTLRequest(path, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE,

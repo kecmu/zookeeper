@@ -995,7 +995,7 @@ public class ClientCnxn {
                                                        dataWatchesBatch,
                                                        existWatchesBatch,
                                                        childWatchesBatch);
-                        RequestHeader header = new RequestHeader(-8, OpCode.setWatches);
+                        RequestHeader header = new RequestHeader(0, -8, OpCode.setWatches);
                         Packet packet = new Packet(header, new ReplyHeader(), sw, null, null);
                         outgoingQueue.addFirst(packet);
                     }
@@ -1003,7 +1003,7 @@ public class ClientCnxn {
             }
 
             for (AuthData id : authInfo) {
-                outgoingQueue.addFirst(new Packet(new RequestHeader(-4,
+                outgoingQueue.addFirst(new Packet(new RequestHeader(0, -4,
                         OpCode.auth), null, new AuthPacket(0, id.scheme,
                         id.data), null, null));
             }
@@ -1035,7 +1035,7 @@ public class ClientCnxn {
 
         private void sendPing() {
             lastPingSentNs = System.nanoTime();
-            RequestHeader h = new RequestHeader(-2, OpCode.ping);
+            RequestHeader h = new RequestHeader(0, -2, OpCode.ping);
             queuePacket(h, null, null, null, null, null, null, null, null);
         }
 
@@ -1570,7 +1570,7 @@ public class ClientCnxn {
             return;
         }
         authInfo.add(new AuthData(scheme, auth));
-        queuePacket(new RequestHeader(-4, OpCode.auth), null,
+        queuePacket(new RequestHeader(0, -4, OpCode.auth), null,
                 new AuthPacket(0, scheme, auth), null, null, null, null,
                 null, null);
     }

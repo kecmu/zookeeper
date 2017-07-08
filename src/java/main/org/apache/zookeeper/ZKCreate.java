@@ -12,7 +12,7 @@ public class ZKCreate {
     }
 
     public static void main(String[] args) {
-        String path = "test_";
+        String path = "/test_";
         byte[] data = "ininitial data".getBytes();
 
         try {

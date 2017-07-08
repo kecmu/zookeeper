@@ -12,13 +12,16 @@ public class ZKCreate {
     }
 
     public static void main(String[] args) {
-        String path = "/test_";
+        String path_base = "/test_";
         byte[] data = "ininitial data".getBytes();
 
         try {
             conn = new ZKConnect();
             zk = conn.connect("localhost");
-            create(path, data);
+            for(int i=0; i<100; i++){
+                String path = path_base + i;
+                create(path, data);
+            }
             conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());

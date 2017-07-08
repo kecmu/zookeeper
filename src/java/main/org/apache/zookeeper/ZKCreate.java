@@ -18,7 +18,7 @@ public class ZKCreate {
         try {
             conn = new ZKConnect();
             zk = conn.connect("localhost");
-            for(int i=0; i<100; i++){
+            for(int i=100; i<200; i++){
                 String path = path_base + i;
                 create(path, data);
             }

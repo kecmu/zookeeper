@@ -1,5 +1,6 @@
 package org.apache.zookeeper;
 
+import java.util.Random;
 /**
  * Created by wangke on 7/8/17.
  */
@@ -12,20 +13,32 @@ public class ZKCreate {
     }
 
     public static void main(String[] args) {
-        String path_base = "/test_";
-        byte[] data = "ininitial data".getBytes();
+        String path_base = "/test_long";
+        String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", 10);
+        String simple_string = "h";
+        byte[] long_data = random_string.getBytes();
+        byte[] simple_data = simple_string.getBytes();
 
         try {
             conn = new ZKConnect();
             zk = conn.connect("localhost");
-            for(int i=100; i<200; i++){
-                String path = path_base + i;
-                create(path, data);
-            }
+            create(path_base, long_data);
+            create("/test_short", simple_data);
             conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static String generateString(String characters, int length)
+    {
+        Random rng = new Random();
+        char[] text = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            text[i] = characters.charAt(rng.nextInt(characters.length()));
+        }
+        return new String(text);
     }
 
 

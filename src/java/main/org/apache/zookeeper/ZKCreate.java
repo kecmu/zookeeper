@@ -1,15 +1,19 @@
 package org.apache.zookeeper;
 
 import java.util.Random;
+import java.util.LinkedList;
+
+import org.apache.zookeeper.AsyncCallback.StringCallback;
 /**
  * Created by wangke on 7/8/17.
  */
-public class ZKCreate {
+public class ZKCreate implements StringCallback {
     private static ZooKeeper zk;
     private static ZKConnect conn;
+    private static LinkedList<Integer> results = new LinkedList<Integer>();
 
-    public static void create(String path, byte[] data) throws KeeperException, InterruptedException {
-        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    public void create(String path, byte[] data) throws KeeperException, InterruptedException {
+        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, results);
     }
 
     public static void main(String[] args) {
@@ -24,10 +28,11 @@ public class ZKCreate {
         byte[] simple_data = simple_string.getBytes();
 
         try {
+            ZKCreate create_obj = new ZKCreate();
             conn = new ZKConnect();
             zk = conn.connect("localhost");
-            create(path_base, long_data);
-            create("/test_short", simple_data);
+            create_obj.create(path_base, long_data);
+            create_obj.create("/test_short", simple_data);
             conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -43,6 +48,14 @@ public class ZKCreate {
             text[i] = characters.charAt(rng.nextInt(characters.length()));
         }
         return new String(text);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void processResult(int rc, String path, Object ctx, String name) {
+        synchronized(ctx) {
+            ((LinkedList<Integer>)ctx).add(rc);
+            ctx.notifyAll();
+        }
     }
 
 

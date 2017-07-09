@@ -14,7 +14,7 @@ public class ZKCreate {
 
     public static void main(String[] args) {
         String path_base = "/test_long";
-        String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", 10);
+        String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", 1000000);
         String simple_string = "h";
         byte[] long_data = random_string.getBytes();
         byte[] simple_data = simple_string.getBytes();

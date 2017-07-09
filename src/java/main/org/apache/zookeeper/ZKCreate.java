@@ -13,8 +13,12 @@ public class ZKCreate {
     }
 
     public static void main(String[] args) {
+        if(args.length!=1){
+            System.out.println("usage: ./bin/javaCli.sh length");
+            System.exit(0);
+        }
         String path_base = "/test_long";
-        String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", 1000000);
+        String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", Integer.valueOf(args[0]));
         String simple_string = "h";
         byte[] long_data = random_string.getBytes();
         byte[] simple_data = simple_string.getBytes();

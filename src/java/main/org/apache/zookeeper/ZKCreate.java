@@ -18,7 +18,7 @@ public class ZKCreate implements StringCallback {
 
     public static void main(String[] args) {
         if(args.length!=1){
-            System.out.println("usage: ./bin/javaCli.sh length");
+            System.out.println("usage: ./bin/javaCli.sh option");
             System.exit(0);
         }
         String path_base = "/test_";
@@ -32,9 +32,15 @@ public class ZKCreate implements StringCallback {
             conn = new ZKConnect();
             zk = conn.connect("localhost");
             // create_obj.create(path_base, long_data);
-            for(int i=0; i<200; i++) {
-                // create_obj.create(path_base+i, simple_data);
-                delete(path_base+i);
+            if(args[0].startsWith("d")){
+                for(int i=0; i<100; i++) {
+                    delete(path_base+i);
+                }
+            }
+            else{
+                for(int i=0; i<100; i++) {
+                    create_obj.create(path_base+i, simple_data);
+                }
             }
             conn.close();
         } catch (Exception e) {

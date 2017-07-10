@@ -387,6 +387,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
     @Override
     public void validLog(Request r) {
+        LOG.info("receive new packet with "+r.getSequence_id());
         // Currently only validate create, setdata and delete requests.
         if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
             if(r.getSequence_id() <= this.sequence_id) {

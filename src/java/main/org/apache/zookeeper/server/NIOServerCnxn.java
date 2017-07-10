@@ -104,6 +104,7 @@ public class NIOServerCnxn extends ServerCnxn {
         this.sk = sk;
         this.factory = factory;
         this.selectorThread = selectorThread;
+        this.sequence_id = 0;
         if (this.factory.login != null) {
             this.zooKeeperSaslServer = new ZooKeeperSaslServer(factory.login);
         }

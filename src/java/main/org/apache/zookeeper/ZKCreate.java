@@ -30,7 +30,7 @@ public class ZKCreate implements StringCallback {
         try {
             ZKCreate create_obj = new ZKCreate();
             conn = new ZKConnect();
-            zk = conn.connect("localhost");
+            zk = conn.connect("10.0.0.2");
             // create_obj.create(path_base, long_data);
             if(args[0].startsWith("d")){
                 for(int i=0; i<100; i++) {

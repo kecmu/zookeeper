@@ -244,6 +244,9 @@ public abstract class ServerCnxn implements Stats, Watcher {
         return lastLatency;
     }
 
+    public void validLog(Request r) {
+    }
+
     /**
      * Prints detailed stats information for the connection.
      *

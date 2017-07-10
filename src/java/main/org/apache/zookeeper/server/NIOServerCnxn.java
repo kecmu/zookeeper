@@ -39,6 +39,7 @@ import org.apache.jute.BinaryInputArchive;
 import org.apache.jute.BinaryOutputArchive;
 import org.apache.jute.Record;
 import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
@@ -91,6 +92,9 @@ public class NIOServerCnxn extends ServerCnxn {
     private long sessionId;
 
     private final int outstandingLimit;
+
+    // added for functionality of corfu wrapper
+    private int sequence_id;
 
     public NIOServerCnxn(ZooKeeperServer zk, SocketChannel sock,
                          SelectionKey sk, NIOServerCnxnFactory factory,
@@ -378,6 +382,27 @@ public class NIOServerCnxn extends ServerCnxn {
 
     private void readRequest() throws IOException {
         zkServer.processPacket(this, incomingBuffer);
+    }
+
+    @Override
+    public void validLog(Request r) {
+        // Currently only validate create, setdata and delete requests.
+        if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
+            if(r.getSequence_id() <= this.sequence_id) {
+                LOG.warn("possible duplicate write request id, stopping the system");
+                System.exit(1);
+            }
+            if(r.getSequence_id() == this.sequence_id + 1) {
+                // normal sequence id received, validation succeeds
+                return;
+            }
+            else {
+                // there is a hole between the last received sequence id and the current id.
+                // Todo: query the corfu server to fill the hole before returning.
+                return;
+            }
+
+        }
     }
 
     // Only called as callback from zkServer.processPacket()

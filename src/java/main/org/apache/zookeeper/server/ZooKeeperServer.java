@@ -1049,7 +1049,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
         RequestHeader h = new RequestHeader();
         h.deserialize(bia, "header");
-        LOG.info("SID: " + h.getSid());
         // Through the magic of byte buffers, txn will not be
         // pointing
         // to the start of the txn
@@ -1105,9 +1104,13 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 Request si = new Request(cnxn, cnxn.getSessionId(), h.getXid(),
                   h.getType(), incomingBuffer, cnxn.getAuthInfo());
                 si.setOwner(ServerCnxn.me);
+                si.setSequence_id(h.getSid());
                 // Always treat packet from the client as a possible
                 // local request.
                 setLocalSessionFlag(si);
+                // The main corfu wrapper logic enters here
+                cnxn.validLog(si);
+                // The corfu log has been validated, hand the request to normal zk processing
                 submitRequest(si);
             }
         }

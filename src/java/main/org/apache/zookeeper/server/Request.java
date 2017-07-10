@@ -83,6 +83,9 @@ public class Request {
     private KeeperException e;
 
     public QuorumVerifier qv = null;
+
+    // added for functionality of corfu wrapper
+    private int sequence_id;
     
     /**
      * If this is a create or close request for a local-only session.
@@ -119,6 +122,14 @@ public class Request {
 
     public void setTxn(Record txn) {
         this.txn = txn;
+    }
+
+    public void setSequence_id(int id) {
+        this.sequence_id = id;
+    }
+
+    public int getSequence_id() {
+        return this.sequence_id;
     }
 
     /**

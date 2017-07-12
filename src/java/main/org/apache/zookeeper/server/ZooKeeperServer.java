@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +73,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.*;
-import java.nio.channels.SocketChannel;
+import org.apache.zookeeper.proto.QueryHeader;
 
 
 /**
@@ -1147,23 +1148,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     public boolean queryQurfu(Request r){
         try{
-            InetSocketAddress hostAddress = new InetSocketAddress("10.0.0.3", 2191);
-            SocketChannel query_client = SocketChannel.open(hostAddress);
-            for(int i=r.cnxn.sequence_id+1; i<=r.getSequence_id(); i++){
-                // query the corfu server for i th log
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                BinaryOutputArchive boa = BinaryOutputArchive.getArchive(baos);
-                boa.writeInt(1, "query type");
-                boa.writeInt(i, "query slot");
-                baos.close();
-                ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
-                bb.flip();
-                while(bb.hasRemaining())
-                    query_client.write(bb);
-                // read the response
-                bb.clear();
-            }
-            query_client.close();
+            Socket socket = new Socket("10.0.0.3",2191);
+            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            QueryHeader qheader = new QueryHeader(1, r.getSequence_id());
+            objectOutput.write(qheader);
             return true;
             // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {

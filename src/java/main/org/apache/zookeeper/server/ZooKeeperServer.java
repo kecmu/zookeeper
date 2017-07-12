@@ -1157,6 +1157,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 boa.writeInt(i, "query slot");
                 baos.close();
                 ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
+                bb.flip();
                 while(bb.hasRemaining())
                     query_client.write(bb);
                 // read the response

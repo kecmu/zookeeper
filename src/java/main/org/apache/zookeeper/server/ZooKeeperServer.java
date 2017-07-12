@@ -44,6 +44,7 @@ import org.apache.zookeeper.Environment;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.KeeperException.SessionExpiredException;
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooDefs.OpCode;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -69,6 +70,9 @@ import org.apache.zookeeper.txn.CreateSessionTxn;
 import org.apache.zookeeper.txn.TxnHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.*;
+import java.nio.channels.SocketChannel;
 
 
 /**
@@ -1109,12 +1113,60 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 // local request.
                 setLocalSessionFlag(si);
                 // The main corfu wrapper logic enters here
-                cnxn.validLog(si);
+                validLog(si);
                 // The corfu log has been validated, hand the request to normal zk processing
                 submitRequest(si);
             }
         }
         cnxn.incrOutstandingRequests(h);
+    }
+
+    public void validLog(Request r) {
+        LOG.info("receive new packet with "+r.getSequence_id());
+        // Currently only validate create, setdata and delete requests.
+        if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
+            if(r.getSequence_id() <= r.cnxn.sequence_id) {
+                LOG.warn("possible duplicate write request id, stopping the system");
+                System.exit(1);
+            }
+            if(r.getSequence_id() == r.cnxn.sequence_id + 1) {
+                // normal sequence id received, validation succeeds
+                r.cnxn.sequence_id = r.getSequence_id();
+                if(r.getSequence_id()==2)
+                    queryQurfu(r);
+                return;
+            }
+            else {
+                // there is a hole between the last received sequence id and the current id.
+                queryQurfu(r);
+                r.cnxn.sequence_id = r.getSequence_id();
+                return;
+            }
+        }
+    }
+
+    public boolean queryQurfu(Request r){
+        try{
+            InetSocketAddress hostAddress = new InetSocketAddress("10.0.0.3", 2191);
+            SocketChannel query_client = SocketChannel.open(hostAddress);
+            for(int i=r.cnxn.sequence_id+1; i<=r.getSequence_id(); i++){
+                // query the corfu server for i th log
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                BinaryOutputArchive boa = BinaryOutputArchive.getArchive(baos);
+                boa.writeInt(1, "query type");
+                boa.writeInt(i, "query slot");
+                baos.close();
+                ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
+                while(bb.hasRemaining())
+                    query_client.write(bb);
+                // read the response
+                bb.clear();
+            }
+            query_client.close();
+            // Todo: query the corfu server to fill the hole before returning
+        }catch(Exception e) {
+            System.err.println("Exception: " + e.toString());
+        }
     }
 
     private Record processSasl(ByteBuffer incomingBuffer, ServerCnxn cnxn) throws IOException {

@@ -1153,6 +1153,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             ByteBuffer bb = ByteBuffer.allocate(8);
             bb.putInt(1);
             bb.putInt(r.getSequence_id());
+            bb.flip();
             objectOutput.write(bb.array());
             return true;
             // Todo: query the corfu server to fill the hole before returning

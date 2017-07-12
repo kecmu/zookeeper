@@ -7,9 +7,9 @@ import org.apache.zookeeper.AsyncCallback.StringCallback;
 /**
  * Created by wangke on 7/8/17.
  */
-public class ZKCreate implements StringCallback {
+public class ZKDemo implements StringCallback {
     private static ZooKeeper zk;
-    private static ZKConnect conn;
+    private static ZKDemoConnect conn;
     private static LinkedList<Integer> results = new LinkedList<Integer>();
 
     public void create(String path, byte[] data) throws KeeperException, InterruptedException {
@@ -17,8 +17,8 @@ public class ZKCreate implements StringCallback {
     }
 
     public static void main(String[] args) {
-        if(args.length!=1){
-            System.out.println("usage: ./bin/javaCli.sh option");
+        if(args.length!=2){
+            System.out.println("usage: ./bin/javaCli.sh option num");
             System.exit(0);
         }
         String path_base = "/test_";
@@ -28,17 +28,17 @@ public class ZKCreate implements StringCallback {
         byte[] simple_data = simple_string.getBytes();
 
         try {
-            ZKCreate create_obj = new ZKCreate();
-            conn = new ZKConnect();
+            ZKDemo create_obj = new ZKDemo();
+            conn = new ZKDemoConnect();
             zk = conn.connect("10.0.0.2");
             // create_obj.create(path_base, long_data);
             if(args[0].startsWith("d")){
-                for(int i=0; i<100; i++) {
+                for(int i=0; i<Integer.valueOf(args[1]); i++) {
                     delete(path_base+i);
                 }
             }
             else{
-                for(int i=0; i<100; i++) {
+                for(int i=0; i<Integer.valueOf(args[1]); i++) {
                     create_obj.create(path_base+i, simple_data);
                 }
             }

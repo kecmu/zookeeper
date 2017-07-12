@@ -78,6 +78,10 @@ module org.apache.zookeeper.proto {
         int xid;
         int type;
     }
+	clase QueryHeader {
+	    int type;
+		int slot;
+	}
     class MultiHeader {
         int type;
         boolean done;

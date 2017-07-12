@@ -8,7 +8,7 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
 /**
  * Created by wangke on 7/8/17.
  */
-public class ZKConnect {
+public class ZKDemoConnect {
     private ZooKeeper zoo;
     final CountDownLatch connected = new CountDownLatch(1);
 

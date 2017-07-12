@@ -19,6 +19,7 @@ public class ZKDemo implements StringCallback {
     public static void main(String[] args) {
         if(args.length!=2){
             System.out.println("usage: ./bin/javaCli.sh option num");
+            System.out.println("hello, excuse me?");
             System.exit(0);
         }
         String path_base = "/test_";

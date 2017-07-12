@@ -1150,8 +1150,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         try{
             Socket socket = new Socket("10.0.0.3",2191);
             ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-            QueryHeader qheader = new QueryHeader(1, r.getSequence_id());
-            objectOutput.write(qheader);
+            ByteBuffer bb = ByteBuffer.allocate(8);
+            bb.putInt(1);
+            bb.putInt(r.getSequence_id());
+            objectOutput.write(bb.array());
             return true;
             // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {

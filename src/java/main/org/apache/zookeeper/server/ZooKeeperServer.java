@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.io.ObjectOutputStream;
+import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1149,12 +1149,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public boolean queryQurfu(Request r){
         try{
             Socket socket = new Socket("10.0.0.3",2191);
-            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             ByteBuffer bb = ByteBuffer.allocate(8);
             bb.putInt(1);
             bb.putInt(r.getSequence_id());
-            bb.flip();
-            objectOutput.write(bb.array());
+            out.write(bb.array());
             return true;
             // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {

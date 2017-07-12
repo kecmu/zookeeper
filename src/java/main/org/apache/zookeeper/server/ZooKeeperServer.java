@@ -1163,9 +1163,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 bb.clear();
             }
             query_client.close();
+            return true;
             // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {
             System.err.println("Exception: " + e.toString());
+            return false;
         }
     }
 

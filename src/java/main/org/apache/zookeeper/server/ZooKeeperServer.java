@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1149,11 +1150,29 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public boolean queryQurfu(Request r){
         try{
             Socket socket = new Socket("10.0.0.3",2191);
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream dout = new DataOutputStream(socket.getOutputStream());
+            DataInputStream din = new DataInputStream(socket.getInputStream());
             ByteBuffer bb = ByteBuffer.allocate(8);
             bb.putInt(1);
             bb.putInt(r.getSequence_id());
-            out.write(bb.array());
+            dout.write(bb.array());
+
+            int response_len = din.readInt();
+            byte[] response = new byte[response_len];
+            if(response_len>0){
+                din.readFully(response);
+                ByteBuffer incomingBuffer = ByteBuffer.wrap(response);
+
+                InputStream bais = new ByteBufferInputStream(incomingBuffer);
+                BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
+                RequestHeader h = new RequestHeader();
+                h.deserialize(bia, "header");
+                incomingBuffer = incomingBuffer.slice();
+                LOG.info("we have decoded a query response: type--" + h.getType() + ", sid--" + h.getSid() + ", xid--" + h.getXid());
+            }
+            else{
+                return false;
+            }
             return true;
             // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {

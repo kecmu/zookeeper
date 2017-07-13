@@ -149,8 +149,6 @@ public abstract class ServerCnxn implements Stats, Watcher {
     protected long count;
     protected long totalLatency;
 
-    public int sequence_id;
-
     public synchronized void resetStats() {
         packetsReceived.set(0);
         packetsSent.set(0);

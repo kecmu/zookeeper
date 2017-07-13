@@ -101,6 +101,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public final static Exception ok = new Exception("No prob");
     protected RequestProcessor firstProcessor;
     protected volatile State state = State.INITIAL;
+    private int log_id = -1;
 
     protected enum State {
         INITIAL, RUNNING, SHUTDOWN, ERROR
@@ -1118,67 +1119,74 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     public void validLog(Request r) {
-        // Currently only validate create, setdata and delete requests.
+        // Currently only validate create, set data and delete requests.
         if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
-            if(r.getSequence_id() <= r.cnxn.sequence_id) {
+            if(r.getSequence_id() <= this.log_id) {
                 LOG.warn("possible duplicate write request id, stopping the system");
                 System.exit(1);
             }
-            if(r.getSequence_id() == r.cnxn.sequence_id + 1) {
+            if(r.getSequence_id() == this.log_id + 1) {
                 // normal sequence id received, validation succeeds
-                r.cnxn.sequence_id = r.getSequence_id();
-                if(r.getSequence_id()==2)
-                    queryQurfu(r);
+                this.log_id = r.getSequence_id();
+                if(r.getSequence_id()==4)
+                    queryQurfu(r, 0, 2);
                 return;
             }
             else {
                 // there is a hole between the last received sequence id and the current id.
-                queryQurfu(r);
-                r.cnxn.sequence_id = r.getSequence_id();
+                queryQurfu(r, this.log_id+1, r.getSequence_id());
+                this.log_id = r.getSequence_id();
                 return;
             }
         }
     }
 
-    public boolean queryQurfu(Request r){
+    /**
+     * query the corfu log for the missing write requests
+     * @param r incoming request that triggers this query
+     * @param index_first the index of the first missing slot
+     * @param index_last  the index of the last missing slot + 1
+     */
+    public boolean queryQurfu(Request r, int index_first, int index_last){
         try{
             Socket socket = new Socket("10.0.0.3",2191);
             DataOutputStream dout = new DataOutputStream(socket.getOutputStream());
             DataInputStream din = new DataInputStream(socket.getInputStream());
             ByteBuffer bb = ByteBuffer.allocate(8);
-            bb.putInt(1);
-            bb.putInt(0);
-            dout.write(bb.array());
+            for(int index=index_first; index<index_last; index++){
+                bb.putInt(1);
+                bb.putInt(index);
+                dout.write(bb.array());
 
-            int response_len = din.readInt();
-            byte[] response = new byte[response_len];
-            if(response_len>0){
-                din.readFully(response);
-                ByteBuffer incomingBuffer = ByteBuffer.wrap(response);
+                int response_len = din.readInt();
+                byte[] response = new byte[response_len];
+                if (response_len > 0) {
+                    din.readFully(response);
+                    ByteBuffer incomingBuffer = ByteBuffer.wrap(response);
 
-                InputStream bais = new ByteBufferInputStream(incomingBuffer);
-                BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
-                RequestHeader h = new RequestHeader();
-                h.deserialize(bia, "header");
-                incomingBuffer = incomingBuffer.slice();
-                // excute the missing write requests before returning to the current request
-                // Todo: only excute write request
-                Set<Id> authInfo_tmp = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
-                authInfo_tmp.add(new Id("ip", "0.0.0.0"));
-                Request si = new Request(null, r.cnxn.getSessionId(), h.getXid(),
-                        h.getType(), incomingBuffer, new ArrayList<Id>(authInfo_tmp));
-                si.setOwner(ServerCnxn.me);
-                si.setSequence_id(h.getSid());
-                // Always treat packet from the client as a possible
-                // local request.
-                setLocalSessionFlag(si);
-                submitRequest(si);
-            }
-            else{
-                return false;
+                    InputStream bais = new ByteBufferInputStream(incomingBuffer);
+                    BinaryInputArchive bia = BinaryInputArchive.getArchive(bais);
+                    RequestHeader h = new RequestHeader();
+                    h.deserialize(bia, "header");
+                    incomingBuffer = incomingBuffer.slice();
+                    // excute the missing write requests before returning to the current request
+                    // Todo: only excute write request
+                    Set<Id> authInfo_tmp = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
+                    authInfo_tmp.add(new Id("ip", "0.0.0.0"));
+                    Request si = new Request(null, r.cnxn.getSessionId(), h.getXid(),
+                            h.getType(), incomingBuffer, new ArrayList<Id>(authInfo_tmp));
+                    si.setOwner(ServerCnxn.me);
+                    si.setSequence_id(h.getSid());
+                    // Always treat packet from the client as a possible
+                    // local request.
+                    setLocalSessionFlag(si);
+                    submitRequest(si);
+                } else {
+                    return false;
+                }
+                bb.clear();
             }
             return true;
-            // Todo: query the corfu server to fill the hole before returning
         }catch(Exception e) {
             System.err.println("Exception: " + e.toString());
             return false;

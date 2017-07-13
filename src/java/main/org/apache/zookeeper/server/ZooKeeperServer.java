@@ -1124,7 +1124,6 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     public void validLog(Request r) {
-        LOG.info("receive new packet with "+r.getSequence_id());
         // Currently only validate create, setdata and delete requests.
         if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
             if(r.getSequence_id() <= r.cnxn.sequence_id) {
@@ -1154,7 +1153,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             DataInputStream din = new DataInputStream(socket.getInputStream());
             ByteBuffer bb = ByteBuffer.allocate(8);
             bb.putInt(1);
-            bb.putInt(r.getSequence_id());
+            bb.putInt(3);
             dout.write(bb.array());
 
             int response_len = din.readInt();
@@ -1168,7 +1167,16 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 RequestHeader h = new RequestHeader();
                 h.deserialize(bia, "header");
                 incomingBuffer = incomingBuffer.slice();
-                LOG.info("we have decoded a query response: type--" + h.getType() + ", sid--" + h.getSid() + ", xid--" + h.getXid());
+                // excute the missing write requests before returning to the current request
+                // Todo: only excute write request
+                Request si = new Request(null, 0L, h.getXid(),
+                        h.getType(), incomingBuffer, new Id("ip", "0.0.0.0"));
+                si.setOwner(ServerCnxn.me);
+                si.setSequence_id(h.getSid());
+                // Always treat packet from the client as a possible
+                // local request.
+                setLocalSessionFlag(si);
+                submitRequest(si);
             }
             else{
                 return false;

@@ -1128,15 +1128,16 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             if(r.getSequence_id() == this.log_id + 1) {
                 // normal sequence id received, validation succeeds
                 this.log_id = r.getSequence_id();
-                if(r.getSequence_id()==4)
-                    queryQurfu(r, 0, 2);
-                return;
             }
             else {
                 // there is a hole between the last received sequence id and the current id.
-                queryQurfu(r, this.log_id+1, r.getSequence_id());
-                this.log_id = r.getSequence_id();
-                return;
+                boolean filled = queryQurfu(r, this.log_id+1, r.getSequence_id());
+                if(filled)
+                    this.log_id = r.getSequence_id();
+                else {
+                    LOG.warn("query failed");
+                    System.exit(1);
+                }
             }
         }
     }

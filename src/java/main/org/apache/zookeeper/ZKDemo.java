@@ -17,12 +17,12 @@ public class ZKDemo implements StringCallback {
     }
 
     public static void main(String[] args) {
-        if(args.length!=2){
-            System.out.println("usage: ./bin/javaCli.sh option num");
+        if(args.length!=4){
+            System.out.println("usage: ./bin/javaCli.sh server_ip option num zcode_base_name");
             System.out.println("hello, excuse me?");
             System.exit(0);
         }
-        String path_base = "/test_";
+        String path_base = args[3];
         // String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", Integer.valueOf(args[0]));
         String simple_string = "helloworld";
         // byte[] long_data = random_string.getBytes();
@@ -31,15 +31,15 @@ public class ZKDemo implements StringCallback {
         try {
             ZKDemo create_obj = new ZKDemo();
             conn = new ZKDemoConnect();
-            zk = conn.connect("10.0.0.2");
+            zk = conn.connect(args[0]);
             // create_obj.create(path_base, long_data);
-            if(args[0].startsWith("d")){
-                for(int i=0; i<Integer.valueOf(args[1]); i++) {
+            if(args[1].startsWith("d")){
+                for(int i=0; i<Integer.valueOf(args[2]); i++) {
                     delete(path_base+i);
                 }
             }
             else{
-                for(int i=0; i<Integer.valueOf(args[1]); i++) {
+                for(int i=0; i<Integer.valueOf(args[2]); i++) {
                     create_obj.create(path_base+i, simple_data);
                 }
             }

@@ -1127,7 +1127,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             if(r.getSequence_id() == r.cnxn.sequence_id + 1) {
                 // normal sequence id received, validation succeeds
                 r.cnxn.sequence_id = r.getSequence_id();
-                if(r.getSequence_id()==2)
+                if(r.getSequence_id()==8)
                     queryQurfu(r);
                 return;
             }

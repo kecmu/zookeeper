@@ -1165,7 +1165,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 // Todo: only excute write request
                 Set<Id> authInfo_tmp = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
                 authInfo_tmp.add(new Id("ip", "0.0.0.0"));
-                Request si = new Request(null, 0L, h.getXid(),
+                Request si = new Request(null, r.cnxn.getSessionId(), h.getXid(),
                         h.getType(), incomingBuffer, new ArrayList<Id>(authInfo_tmp));
                 si.setOwner(ServerCnxn.me);
                 si.setSequence_id(h.getSid());

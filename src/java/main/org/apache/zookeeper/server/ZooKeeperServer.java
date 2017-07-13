@@ -26,16 +26,10 @@ import java.io.PrintWriter;
 import java.io.DataOutputStream;
 import java.io.DataInputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.Set;
 
 import javax.security.sasl.SaslException;
 
@@ -1169,8 +1163,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 incomingBuffer = incomingBuffer.slice();
                 // excute the missing write requests before returning to the current request
                 // Todo: only excute write request
+                Set<Id> authInfo_tmp = Collections.newSetFromMap(new ConcurrentHashMap<Id, Boolean>());
+                authInfo_tmp.add(new Id("ip", "0.0.0.0"));
                 Request si = new Request(null, 0L, h.getXid(),
-                        h.getType(), incomingBuffer, new Id("ip", "0.0.0.0"));
+                        h.getType(), incomingBuffer, authInfo_tmp);
                 si.setOwner(ServerCnxn.me);
                 si.setSequence_id(h.getSid());
                 // Always treat packet from the client as a possible

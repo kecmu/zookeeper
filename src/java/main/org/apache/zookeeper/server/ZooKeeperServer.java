@@ -1127,7 +1127,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             if(r.getSequence_id() == r.cnxn.sequence_id + 1) {
                 // normal sequence id received, validation succeeds
                 r.cnxn.sequence_id = r.getSequence_id();
-                if(r.getSequence_id()==8)
+                if(r.getSequence_id()==2)
                     queryQurfu(r);
                 return;
             }
@@ -1147,7 +1147,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             DataInputStream din = new DataInputStream(socket.getInputStream());
             ByteBuffer bb = ByteBuffer.allocate(8);
             bb.putInt(1);
-            bb.putInt(3);
+            bb.putInt(0);
             dout.write(bb.array());
 
             int response_len = din.readInt();

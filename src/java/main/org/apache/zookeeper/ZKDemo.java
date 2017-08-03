@@ -17,7 +17,7 @@ public class ZKDemo implements StringCallback {
     private static String path_base;
     private static byte[] simple_data;
 
-    public static void create(String path, byte[] data) throws KeeperException, InterruptedException {
+    public void create(String path, byte[] data) throws KeeperException, InterruptedException {
         zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, results);
     }
 
@@ -47,7 +47,7 @@ public class ZKDemo implements StringCallback {
             }
             else{
                 for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
-                    create(path_base+requests_sent, simple_data);
+                    create_obj.create(path_base+requests_sent, simple_data);
                     requests_sent += 1;
                 }
             }
@@ -74,8 +74,8 @@ public class ZKDemo implements StringCallback {
             ((LinkedList<Integer>)ctx).add(rc);
             ctx.notifyAll();
             try {
-                if(requests_sent<total_requests){
-                    create(path_base+requests_sent, simple_data);
+                while(requests_sent<total_requests){
+                    zk.create(path_base+requests_sent, simple_data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                     requests_sent += 1;
                 }
             }catch(Exception e) {

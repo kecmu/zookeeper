@@ -73,14 +73,14 @@ public class ZKDemo implements StringCallback {
         synchronized(ctx) {
             ((LinkedList<Integer>)ctx).add(rc);
             ctx.notifyAll();
-            try {
+            /*try {
                 while(requests_sent<total_requests){
                     zk.create(path_base+requests_sent, simple_data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                     requests_sent += 1;
                 }
             }catch(Exception e) {
                 System.out.println(e.getMessage());
-            }
+            }*/
         }
     }
 

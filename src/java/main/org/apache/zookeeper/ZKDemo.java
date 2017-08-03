@@ -18,7 +18,7 @@ public class ZKDemo implements StringCallback {
     private static byte[] simple_data;
 
     public void create(String path, byte[] data) throws KeeperException, InterruptedException {
-        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, results);
+        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
     public static void main(String[] args) {
@@ -34,6 +34,7 @@ public class ZKDemo implements StringCallback {
         simple_data = simple_string.getBytes();
         total_requests = Integer.valueOf(args[2]);
         MAX_REQUEST_ON_FLY = Integer.valueOf(args[3]);
+        long average_delay = 0;
 
         try {
             ZKDemo create_obj = new ZKDemo();
@@ -47,12 +48,17 @@ public class ZKDemo implements StringCallback {
             }
             else{
                 for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
+                    long start = System.currentTimeMillis();
                     create_obj.create(path_base+requests_sent, simple_data);
-                    requests_sent += 1;
-                    System.out.println(requests_sent);
+                    long end = System.currentTimeMillis();
+                    long duration = end - start;
+                    average_delay += duration;
+                    System.out.println(duration);
                 }
             }
-            // conn.close();
+            average_delay = average_delay / MAX_REQUEST_ON_FLY;
+            System.out.println("average delay: "+(int)(average_delay));
+            conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

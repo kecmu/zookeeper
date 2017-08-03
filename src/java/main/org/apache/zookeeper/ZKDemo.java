@@ -11,22 +11,29 @@ public class ZKDemo implements StringCallback {
     private static ZooKeeper zk;
     private static ZKDemoConnect conn;
     private static LinkedList<Integer> results = new LinkedList<Integer>();
+    private static int requests_sent = 0;
+    private static int total_requests = 0;
+    private static int MAX_REQUEST_ON_FLY = 0;
+    private static String path_base;
+    private static byte[] simple_data;
 
-    public void create(String path, byte[] data) throws KeeperException, InterruptedException {
-        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+    public static void create(String path, byte[] data) throws KeeperException, InterruptedException {
+        zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, this, results);
     }
 
     public static void main(String[] args) {
         if(args.length!=4){
-            System.out.println("usage: ./bin/javaCli.sh server_ip option num zcode_base_name");
+            System.out.println("usage: ./bin/javaCli.sh server_ip option num rate zcode_base_name");
             System.out.println("hello, excuse me?");
             System.exit(0);
         }
-        String path_base = args[3];
+        path_base = args[4];
         // String random_string = generateString("0123456789qwertyuiop[]asdfghjkl;~!@#$%^&*zxcvbnm,.", Integer.valueOf(args[0]));
         String simple_string = "helloworld";
         // byte[] long_data = random_string.getBytes();
-        byte[] simple_data = simple_string.getBytes();
+        simple_data = simple_string.getBytes();
+        total_requests = Integer.valueOf(args[2]);
+        MAX_REQUEST_ON_FLY = Integer.valueOf(args[3]);
 
         try {
             ZKDemo create_obj = new ZKDemo();
@@ -39,11 +46,12 @@ public class ZKDemo implements StringCallback {
                 }
             }
             else{
-                for(int i=0; i<Integer.valueOf(args[2]); i++) {
-                    create_obj.create(path_base+i, simple_data);
+                for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
+                    create_obj.create(path_base+requests_sent, simple_data);
+                    requests_sent += 1;
                 }
             }
-            conn.close();
+            // conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -65,6 +73,14 @@ public class ZKDemo implements StringCallback {
         synchronized(ctx) {
             ((LinkedList<Integer>)ctx).add(rc);
             ctx.notifyAll();
+            try {
+                if(requests_sent<total_requests){
+                    create(path_base+requests_sent, simple_data);
+                    requests_sent += 1;
+                }
+            }catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 

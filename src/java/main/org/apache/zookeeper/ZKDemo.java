@@ -49,6 +49,7 @@ public class ZKDemo implements StringCallback {
                 for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
                     create_obj.create(path_base+requests_sent, simple_data);
                     requests_sent += 1;
+                    System.out.println(requests_sent);
                 }
             }
             // conn.close();

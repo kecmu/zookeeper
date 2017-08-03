@@ -22,7 +22,7 @@ public class ZKDemo implements StringCallback {
     }
 
     public static void main(String[] args) {
-        if(args.length!=4){
+        if(args.length!=5){
             System.out.println("usage: ./bin/javaCli.sh server_ip option num rate zcode_base_name");
             System.out.println("hello, excuse me?");
             System.exit(0);

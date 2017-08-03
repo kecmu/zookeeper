@@ -48,17 +48,17 @@ public class ZKDemo implements StringCallback {
             }
             else{
                 for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
-                    long start = System.currentTimeMillis();
+                    long start = System.nanoTime();
                     create_obj.create(path_base+requests_sent, simple_data);
                     requests_sent += 1;
-                    long end = System.currentTimeMillis();
+                    long end = System.nanoTime();
                     long duration = end - start;
                     average_delay += duration;
                     System.out.println(duration);
                 }
             }
-            average_delay = average_delay / MAX_REQUEST_ON_FLY;
-            System.out.println("average delay: "+(int)(average_delay));
+            double ave = ((double)(average_delay)) / MAX_REQUEST_ON_FLY;
+            System.out.println("average delay: "+ave);
             conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());

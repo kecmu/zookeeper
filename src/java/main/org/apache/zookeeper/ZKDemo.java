@@ -52,7 +52,7 @@ public class ZKDemo extends Thread implements StringCallback {
             System.exit(0);
         }*/
         long average_delay = 0;
-        long start_time = System.currentTimeMillis();
+        //long start_time = System.currentTimeMillis();
         try {
             this.conn = new ZKDemoConnect();
             this.zk = this.conn.connect(host);
@@ -63,31 +63,31 @@ public class ZKDemo extends Thread implements StringCallback {
             }
             else if(this.action.startsWith("g")) {
                 for(int i=0; i<this.total_requests_per_worker; i++) {
-                    //long start = System.nanoTime();
+                    long start = System.nanoTime();
                     this.get(path_base+i);
-                    //long end = System.nanoTime();
-                    //long duration = end - start;
-                    //if(requests_sent >1000)
-                    //    average_delay += duration;
+                    long end = System.nanoTime();
+                    long duration = end - start;
+                    if(i >1000)
+                        average_delay += duration;
                 }
             }
             else{
                 for(int i=0; i<this.total_requests_per_worker; i++) {
-                    //long start = System.nanoTime();
+                    long start = System.nanoTime();
                     this.create(path_base+i, simple_data);
-                    //long end = System.nanoTime();
-                    //long duration = end - start;
-                    //if(requests_sent >1000)
-                    //    average_delay += duration;
+                    long end = System.nanoTime();
+                    long duration = end - start;
+                    if(i >1000)
+                        average_delay += duration;
                 }
             }
-            //double ave = ((double)(average_delay)) / (this.total_requests_per_worker-1000);
-            //System.out.println("average delay: "+ave);
-            long end_time = System.currentTimeMillis();
-            long duration = end_time - start_time;
-            double rps = 1000 * ((double)(this.total_requests_per_worker)) / duration;
-            System.out.println("throughput: "+rps);
-            this.queue.put(rps);
+            double ave = ((double)(average_delay)) / (this.total_requests_per_worker-1000);
+            System.out.println("average delay: "+ave);
+            //long end_time = System.currentTimeMillis();
+            //long duration = end_time - start_time;
+            //double rps = 1000 * ((double)(this.total_requests_per_worker)) / duration;
+            //System.out.println("throughput: "+rps);
+            //this.queue.put(rps);
             if(this.queue.size()==this.numthread){
                 double ave_rps = 0;
                 while(this.queue.isEmpty() == false){

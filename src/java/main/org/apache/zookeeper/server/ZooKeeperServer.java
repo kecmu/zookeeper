@@ -1131,13 +1131,13 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             }
             else {
                 // there is a hole between the last received sequence id and the current id.
-                boolean filled = queryQurfu(r, this.log_id+1, r.getSequence_id());
+                /*boolean filled = queryQurfu(r, this.log_id+1, r.getSequence_id());
                 if(filled)
                     this.log_id = r.getSequence_id();
                 else {
                     LOG.warn("query failed");
                     System.exit(1);
-                }
+                }*/
             }
         }
     }

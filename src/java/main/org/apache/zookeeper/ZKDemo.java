@@ -20,6 +20,7 @@ public class ZKDemo extends Thread implements StringCallback {
     private String action;
     private String host;
     public BlockingQueue queue;
+    private int numthread;
 
     public void create(String path, byte[] data) throws KeeperException, InterruptedException {
         zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
@@ -34,13 +35,14 @@ public class ZKDemo extends Thread implements StringCallback {
     }
 
 
-    public ZKDemo(int total_per_worker, String path, String action, String host, BlockingQueue q){
+    public ZKDemo(int total_per_worker, String path, String action, String host, BlockingQueue q, int numthread){
         this.total_requests_per_worker = total_per_worker;
         this.path_base = path;
         this.action = action;
         this.simple_data = "hello_world".getBytes();
         this.host = host;
         this.queue = q;
+        this.numthread = numthread;
     }
 
     public void run() {
@@ -85,8 +87,14 @@ public class ZKDemo extends Thread implements StringCallback {
             long duration = end_time - start_time;
             double rps = 1000 * ((double)(this.total_requests_per_worker)) / duration;
             System.out.println("throughput: "+rps);
-            //this.queue.put(duration);
-
+            this.queue.put(rps);
+            if(this.queue.size()==this.numthread){
+                double ave_rps = 0;
+                while(this.queue.isEmpty() == false){
+                    ave_rps += (double)(this.queue.poll());
+                }
+                System.out.println("&&&&&&&&&&&&&&&&average through put: "+ ave_rps);
+            }
             conn.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());

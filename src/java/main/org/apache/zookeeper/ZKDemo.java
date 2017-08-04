@@ -21,6 +21,10 @@ public class ZKDemo implements StringCallback {
         zk.create(path, data, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
     }
 
+    public byte[] get(String path) throws KeeperException, InterruptedException {
+        return zk.getData(path, false, null);
+    }
+
     public static void main(String[] args) {
         if(args.length!=5){
             System.out.println("usage: ./bin/javaCli.sh server_ip option num rate zcode_base_name");
@@ -44,6 +48,19 @@ public class ZKDemo implements StringCallback {
             if(args[1].startsWith("d")){
                 for(int i=0; i<Integer.valueOf(args[2]); i++) {
                     delete(path_base+i);
+                }
+            }
+            else if(args[1].startsWith("g")) {
+                for(int i=0; i<ZKDemo.MAX_REQUEST_ON_FLY; i++) {
+                    long start = System.nanoTime();
+                    byte[] res = create_obj.get(path_base+requests_sent);
+                    long end = System.nanoTime();
+                    requests_sent += 1;
+                    long duration = end - start;
+                    String str_res = new String(res, "UTF-8");
+                    System.out.println(str_res);
+                    average_delay += duration;
+                    System.out.println(duration);
                 }
             }
             else{

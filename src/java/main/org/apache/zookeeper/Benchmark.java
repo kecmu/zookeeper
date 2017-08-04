@@ -10,7 +10,9 @@ public class Benchmark {
             System.out.println("hello, excuse me?");
             System.exit(0);
         }
-        ZKDemo zkdemo = new ZKDemo(Integer.valueOf(args[2]), args[4], args[1], args[0]);
-        zkdemo.start();
+        for(int i=0; i<Integer.valueOf(args[3]); i++){
+            ZKDemo zkdemo = new ZKDemo(Integer.valueOf(args[2]), i+args[4], args[1], args[0]);
+            zkdemo.start();
+        }
     }
 }

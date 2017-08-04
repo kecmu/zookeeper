@@ -1110,7 +1110,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 // local request.
                 setLocalSessionFlag(si);
                 // The main corfu wrapper logic enters here
-                // validLog(si);
+                validLog(si);
                 // The corfu log has been validated, hand the request to normal zk processing
                 submitRequest(si);
             }

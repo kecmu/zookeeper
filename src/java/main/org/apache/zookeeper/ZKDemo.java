@@ -57,10 +57,8 @@ public class ZKDemo implements StringCallback {
                     long end = System.nanoTime();
                     requests_sent += 1;
                     long duration = end - start;
-                    String str_res = new String(res, "UTF-8");
-                    System.out.println(str_res);
-                    average_delay += duration;
-                    System.out.println(duration);
+                    if(requests_sent >1000)
+                        average_delay += duration;
                 }
             }
             else{
@@ -70,11 +68,11 @@ public class ZKDemo implements StringCallback {
                     requests_sent += 1;
                     long end = System.nanoTime();
                     long duration = end - start;
-                    average_delay += duration;
-                    System.out.println(duration);
+                    if(requests_sent >1000)
+                        average_delay += duration;
                 }
             }
-            double ave = ((double)(average_delay)) / MAX_REQUEST_ON_FLY;
+            double ave = ((double)(average_delay)) / (MAX_REQUEST_ON_FLY-1000);
             System.out.println("average delay: "+ave);
             conn.close();
         } catch (Exception e) {

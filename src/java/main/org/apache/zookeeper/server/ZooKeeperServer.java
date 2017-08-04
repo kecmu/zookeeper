@@ -1122,8 +1122,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         // Currently only validate create, set data and delete requests.
         if((r.type == ZooDefs.OpCode.create) || (r.type == ZooDefs.OpCode.delete) || (r.type == ZooDefs.OpCode.setData)) {
             if(r.getSequence_id() <= this.log_id) {
-                LOG.warn("possible duplicate write request id, stopping the system");
-                System.exit(1);
+                // LOG.warn("possible duplicate write request id, stopping the system");
+                // System.exit(1);
             }
             if(r.getSequence_id() == this.log_id + 1) {
                 // normal sequence id received, validation succeeds
